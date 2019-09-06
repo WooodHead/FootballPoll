@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="utf-8">
+
+  <title>Football Poll</title>
+
+  <meta property="og:image" content="https://mtrajk.github.io/FootballPoll/img/banner.jpg">
+  <meta property="og:image:width" content="920">
+  <meta property="og:image:height" content="680">
+  <meta property="og:url" content="https://mtrajk.github.io/FootballPoll/">
+  <meta property="og:description"
+    content="Football Poll is a poll application which offers a simple way for polls tracking, and it's recreating the poll after it ends.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Football Poll">
+  <meta name="twitter:image" content="https://mtrajk.github.io/FootballPoll/img/banner.jpg" />
+  <meta name="twitter:url" content="https://mtrajk.github.io/FootballPoll/" />
+  <meta name="twitter:description"
+    content="Football Poll is a poll application which offers a simple way for polls tracking, and it's recreating the poll after it ends." />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Football Poll" />
+
+  <meta name="author" content="Meto Trajkovski">
+  <meta name="description"
+    content="Football Poll is a poll application which offers a simple way for polls tracking, and it's recreating the poll after it ends..">
+  <meta name="keywords" content="footbal poll, football, poll, event, doodle">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link rel="shortcut icon" type="image/x-icon" href="img/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="img/icon16.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="img/icon32.png">
+
+  <link rel="stylesheet" type="text/css" href="css/google_icon_font.css">
+  <!--<link rel="stylesheet" type="text/css" href="css/materialize.min.css">-->
+  <link rel="stylesheet" type="text/css" href="css/materialize.css"> <!-- Delete this, this is only for debugging -->
+  <link rel="stylesheet" type="text/css" href="css/app.css">
+
+</head>
+
+<body class="spinner-loading">
+
+  <!-- MAIN SPINNER -->
+  <div id="main-spinner" class="spinner-overlay">
+    <img class="spinner-logo" src="img/logo.svg">
+    <div id="spinning-part" class="preloader-wrapper active spinner">
+      <div class="spinner-layer spinner-green-only">
+        <div class="circle-clipper left">
+          <div class="circle"></div>
+        </div>
+        <div class="gap-patch">
+          <div class="circle"></div>
+        </div>
+        <div class="circle-clipper right">
+          <div class="circle"></div>
+        </div>
+      </div>
+    </div>
+    <div id="error-info-text">
+      <h4 class="my-green-text">ERROR OCCURRED</h4>
+      <h5 class="my-green-text">TRY AGAIN IN SEVERAL MINUTES</h5>
+    </div>
+  </div>
+  <!-- MAIN SPINNER -->
+
+  <div id="app">
+
+    <!-- NAVBAR -->
+    <header class="navbar-fixed">
+      <nav class="white">
+        <div class="nav-wrapper container">
+          <img class="brand-logo left" src="img/logo.svg" alt="Football Poll logo" title="Football Poll">
+          <ul id="navbar" class="right hide-on-small-and-down">
+            <li><a href="#poll-info">POLL INFO</a></li>
+            <li><a href="#poll-participants">POLL PARTICIPANTS</a></li>
+            <li><a href="#stats">STATS</a></li>
+            <li><a href="#old-polls">OLD POLLS</a></li>
+          </ul>
+        </div>
+      </nav>
+    </header>
+    <!-- NAVBAR -->
+
+    <main>
+      <!-- POLL INFO -->
+      <div id="poll-info" class="scrollspy green-background">
+        <div class="section no-pad-bot">
+          <div class="container">
+            <div class="row">
+              <div class="col s12">
+
+                <div id="poll-info-text" class="row center white-text" v-show="UIBindings.showPollInfo">
+                  <div class="col s12">
+                    <h2><i><b>{{currentPoll.info.title}}</b></i></h2>
+                  </div>
+                  <div class="col s12">
+                    <h6 v-if="showPollNote(currentPoll.info.note)">Note: <span>{{currentPoll.info.note}}</span></h6>
+                    <h6>Time: <span>{{formatTime(currentPoll.info.dayTime)}}</span></h6>
+                    <h6>Day: <span>{{formatDayDate(currentPoll.info.dayTime)}}</span></h6>
+                    <h6>Location: <a v-bind:href="currentPoll.info.locationURL" target="_blank"
+                        class="location-url">{{currentPoll.info.locationDescription}}</a>
+                    </h6>
+                  </div>
+                  <div class="col s12">
+                    <a id="edit-info-button" class="waves-effect waves-my-green button-white btn"
+                      @click="editPollInfo"><i class="material-icons left">edit</i>edit info</a>
+                  </div>
+                </div>
+
+                <div id="poll-info-edit" class="row" v-show="!UIBindings.showPollInfo">
+
+                  <div class="input-field info-input-field col s12 m6 offset-l1 l5 offset-xl2 xl4">
+                    <input id="title-input" type="text" autocomplete="off" v-model="currentPoll.editInfo.title" maxlength="50">
+                    <label id="title-input-label" for="title-input">Title</label>
+                  </div>
+                  <div class="input-field info-input-field col s12 m6 l5 xl4">
+                    <input id="note-input" type="text" autocomplete="off" v-model="currentPoll.editInfo.note" maxlength="100">
+                    <label id="note-input-label" for="note-input">Note</label>
+                  </div>
+                  <div class="input-field info-input-field col s12 m6  offset-l1 l5 offset-xl2 xl4">
+                    <input id="loc-desc-input" type="text" autocomplete="off" v-model="currentPoll.editInfo.locationDescription"
+                      maxlength="50">
+                    <label id="loc-desc-input-label" for="loc-desc-input">Location description</label>
+                  </div>
+                  <div class="input-field info-input-field col s12 m6 l5 xl4">
+                    <input id="loc-url-input" type="text" autocomplete="off" v-model="currentPoll.editInfo.locationURL" maxlength="100">
+                    <label id="loc-url-input-label" for="loc-url-input">Location URL</label>
+                  </div>
+                  <div class="input-field info-input-field col s12 m6 offset-l1 l5 offset-xl2 xl4">
+                    <input id="need-input" type="number" autocomplete="off" v-model="currentPoll.editInfo.needPlayers">
+                    <label id="need-input-label" for="need-input">Need players</label>
+                  </div>
+                  <div class="input-field info-input-field col s12 m6 l5 xl4">
+                    <input id="max-input" type="number" autocomplete="off" v-model="currentPoll.editInfo.maxPlayers">
+                    <label id="max-input-label" for="max-input">Max players</label>
+                  </div>
+                  <div class="input-field info-input-field col s12 m6 offset-l1 l5 offset-xl2 xl4">
+                    <input type="text" id="time-input" autocomplete="off" class="timepicker" @focus="openTimePicker">
+                    <label id="time-input-label" for="time-input">Time</label>
+                  </div>
+                  <div class="input-field info-input-field col s12 m6 l5 xl4">
+                    <input type="text" id="day-input" autocomplete="off" class="datepicker" @focus="openDayPicker">
+                    <label id="day-input-label" for="day-input">Day</label>
+                  </div>
+                  <div class="input-field info-input-field col s12 offset-m3 m6 offset-l3 l6 offset-xl4 xl4">
+                    <input type="text" id="end-date-input" autocomplete="off" class="datepicker" @focus="openEndDatePicker">
+                    <label id="end-date-input-label" for="end-date-input">End date</label>
+                  </div>
+                  <div class="col s12 center">
+                    <button class="waves-effect waves-my-green button-white btn btn-font"
+                      @click="cancelEditingPollInfo"><i class="material-icons left">clear</i>cancel</button>
+                    <a id="save-info-button"
+                      class="waves-effect waves-my-green button-white btn left-margin-btn"
+                      @click="openSaveInfoModal"><i class="material-icons left">save</i>save info</a>
+                  </div>
+
+                </div>
+
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- POLL INFO -->
+
+      <!-- POLL PARTICIPANTS -->
+      <div id="poll-participants" class="scrollspy">
+        <div class="section no-pad-bot">
+          <div class="container">
+            <div class="row">
+              <div class="col s12">
+                <div class="row">
+                  <div class="col s12 l10 offset-l1 xl8 offset-xl2">
+                    <div class="card-panel my-padding">
+                      <div class="row no-margin-bot">
+                        <div class="input-field add-input-field col s12 m6">
+                          <input id="name-autocomplete" autocomplete="off" type="text" class="autocomplete"
+                            v-model="addPollParticipantForm.personName" maxlength="25">
+                          <label id="name-autocomplete-label" for="name-autocomplete">Player</label>
+                        </div>
+                        <div class="input-field add-input-field col s12 m6">
+                          <input id="friend-input" type="text" autocomplete="off" v-model="addPollParticipantForm.friendName"
+                            maxlength="25">
+                          <label id="friend-input-label" for="friend-input">Friend</label>
+                        </div>
+                      </div>
+                      <a id="add-participant-button"
+                        class="btn-floating btn-large waves-effect waves-light button-green waves-light my-floating-button z-depth-2-half"
+                        @click="addPollParticipant" v-bind:disabled="disableAddButton"><i
+                          class="material-icons">add</i></a>
+                    </div>
+                  </div>
+                  <div class="col s12 l10 offset-l1 xl8 offset-xl2">
+                    <ul class="collection with-header z-depth-1">
+                      <li class="collection-header">
+                        <h5>Players
+                          <span class="my-badge my-green">Friends</span>
+                          <span class="my-badge total-badge"
+                            v-bind:style="calculateColor(currentPoll.participants.length,currentPoll.info.needPlayers,currentPoll.info.maxPlayers)">
+                            {{currentPoll.participants.length}}/{{currentPoll.info.needPlayers}}
+                          </span>
+                        </h5>
+                      </li>
+                      <li class="collection-item hover-item" v-for="(participant, index) in currentPoll.participants">
+                        <div> {{capitalizeFirstLetters(participant.personName)}}
+                          <span class="my-badge my-green"
+                            v-if="showFriendName(participant.friendName)">{{capitalizeFirstLetters(participant.friendName)}}</span>
+                          <a class="secondary-content waves-effect waves-red" @click="deletePollParticipant(index)"> <i
+                              class="material-icons">delete</i></a>
+                        </div>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- UPDATE POLL SPINNER -->
+        <div id="update-poll-spinner" class="spinner-overlay" v-if="UIBindings.updatingPollParticipants">
+          <img class="spinner-logo" src="img/logo.svg">
+          <div class="preloader-wrapper active spinner">
+            <div class="spinner-layer spinner-green-only">
+              <div class="circle-clipper left">
+                <div class="circle"></div>
+              </div>
+              <div class="gap-patch">
+                <div class="circle"></div>
+              </div>
+              <div class="circle-clipper right">
+                <div class="circle"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- UPDATE POLL SPINNER -->
+      </div>
+      <!-- POLL PARTICIPANTS -->
+
+      <!-- STATS -->
+      <div id="stats" class="scrollspy green-background">
+        <div class="section no-pad-bot">
+          <div class="container">
+            <div class="row">
+              <div class="col s12">
+                <div class="row">
+                  <div class="col s12 l6 offset-xl2 xl4 center white-text">
+                    <h4 class="header-title">Played Games</h4>
+                    <div class="gold" v-if="checkIfGrt(participantsStats.playedGames.length,0)"><i
+                        class="material-icons">star</i>
+                      <span>{{capitalizeFirstLetters(participantsStats.playedGames[0].name)}}</span> -
+                      <span>{{participantsStats.playedGames[0].polls}}</span></div>
+                    <div class="silver" v-if="checkIfGrt(participantsStats.playedGames.length,1)"><i
+                        class="material-icons">star</i>
+                      <span>{{capitalizeFirstLetters(participantsStats.playedGames[1].name)}}</span> -
+                      <span>{{participantsStats.playedGames[1].polls}}</span></div>
+                    <div class="bronze" v-if="checkIfGrt(participantsStats.playedGames.length,2)"><i
+                        class="material-icons">star</i>
+                      <span>{{capitalizeFirstLetters(participantsStats.playedGames[2].name)}}</span> -
+                      <span>{{participantsStats.playedGames[2].polls}}</span></div>
+                  </div>
+                  <div class="col s12 l6 xl4 center white-text">
+                    <h4 class="header-title">Invited Friends</h4>
+                    <div class="gold" v-if="checkIfGrt(participantsStats.invitedFriends.length,0)"><i
+                        class="material-icons">star</i>
+                      <span>{{capitalizeFirstLetters(participantsStats.invitedFriends[0].name)}}</span> -
+                      <span>{{participantsStats.invitedFriends[0].friends}}</span></div>
+                    <div class="silver" v-if="checkIfGrt(participantsStats.invitedFriends.length,1)"><i
+                        class="material-icons">star</i>
+                      <span>{{capitalizeFirstLetters(participantsStats.invitedFriends[1].name)}}</span> -
+                      <span>{{participantsStats.invitedFriends[1].friends}}</span></div>
+                    <div class="bronze" v-if="checkIfGrt(participantsStats.invitedFriends.length,2)"><i
+                        class="material-icons">star</i>
+                      <span>{{capitalizeFirstLetters(participantsStats.invitedFriends[2].name)}}</span> -
+                      <span>{{participantsStats.invitedFriends[2].friends}}</span></div>
+                  </div>
+                  <div class="col s12 center">
+                    <a id="all-stats-button" class="waves-effect waves-my-green button-white btn modal-trigger"
+                      href="#show-stats-modal"><i class="material-icons left">bar_chart</i>all stats</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- STATS -->
+
+      <!-- OLD POLLS -->
+      <div id="old-polls" class="scrollspy">
+        <div class="section no-pad-bot">
+          <div class="container">
+            <div class="row">
+              <div class="col s12 center green-header">
+                <h4 class="header-title">Old Polls</h4>
+              </div>
+              <div class="col s12">
+                <div class="row">
+                  <div class="col s12 l10 offset-l1 xl8 offset-xl2">
+                    <div class="collection z-depth-1">
+                      <a class="collection-item hover-item waves-effect waves-my-green modal-trigger"
+                        href="#show-old-poll-modal" @click="loadOldPollInfo(index)"
+                        v-for="(poll, index) in oldPolls.polls">
+                        <span class="left">{{poll.info.title}}</span>
+                        <span class="right">{{formatTimeDate(poll.info.dayTime)}}</span>
+                      </a>
+
+                      <!-- LOADING SPINNER -->
+                      <a class="collection-item no-hover-item" v-if="UIBindings.loadingOldPolls">
+                        <div class="progress custom-progress">
+                          <div class="indeterminate"></div>
+                        </div>
+                      </a>
+                      <!-- LOADING SPINNER -->
+                    </div>
+                  </div>
+                  <div class="col s12 center">
+                    <a id="load-more-button" v-bind:disabled="disableLoadMoreButton"
+                      class="waves-effect waves-light button-green btn" @click="loadOldPolls">
+                      <i class="material-icons left">expand_more</i>load more
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- OLD POLLS -->
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="page-footer white">
+      <div class="section no-padding">
+        <div class="container">
+          <div class="row">
+            <div class="col s12">
+              <div class="left">
+                <p class="footer-text">&copy; 2019 <a href="https://github.com/MTrajK/FootballPoll/"
+                    target="_blank">FootballPoll</a></p>
+              </div>
+              <div class="right">
+                <p class="footer-text"><a href="https://github.com/MTrajK/FootballPoll/blob/master/LICENSE"
+                    target="_blank">Apache 2.0 License</a></p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </footer>
+    <!-- FOOTER -->
+
+    <!-- MODALS -->
+    <!-- SAVE INFO MODAL -->
+    <div id="save-info-modal" class="modal">
+      <div class="modal-content">
+        <div class="row no-margin-bot">
+          <div class="col s12 center">
+            <h5 class="my-green-text">Enter admin's credentials to save the poll info</h5>
+          </div>
+          <div class="input-field add-input-field col s12 m6">
+            <input id="save-info-admin-name" type="text" autocomplete="off" maxlength="25" v-model="adminCredentials.name">
+            <label id="save-info-admin-name-label" for="save-info-admin-name">Name</label>
+          </div>
+          <div class="input-field add-input-field col s12 m6">
+            <input id="save-info-admin-password" type="password" autocomplete="off" maxlength="25" v-model="adminCredentials.password">
+            <label id="save-info-admin-password-label" for="save-info-admin-password">Password</label>
+          </div>
+          <div class="col s12 center" v-if="UIBindings.wrongAdminCredentials">
+            <p class="wrong-credentials">Wrong credentials!</p>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <a class="modal-close waves-effect waves-my-green my-green-text btn-flat">cancel</a>
+        <a class="waves-effect waves-my-green my-green-text btn-flat" @click="savePollInfo"
+          v-bind:disabled="disableSaveButton">save</a>
+      </div>
+
+      <!-- SAVE INFO SPINNER -->
+      <div id="save-info-spinner" class="spinner-overlay" v-if="UIBindings.savingPollInfo">
+        <img class="spinner-logo" src="img/logo.svg">
+        <div class="preloader-wrapper active spinner">
+          <div class="spinner-layer spinner-green-only">
+            <div class="circle-clipper left">
+              <div class="circle"></div>
+            </div>
+            <div class="gap-patch">
+              <div class="circle"></div>
+            </div>
+            <div class="circle-clipper right">
+              <div class="circle"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- SAVE INFO SPINNER -->
+    </div>
+    <!-- SAVE INFO MODAL -->
+    <!-- SHOW STATS MODAL -->
+    <div id="show-stats-modal" class="modal modal-fixed-footer stats-height">
+      <div class="modal-content">
+        <div class="row no-margin-bot">
+          <div class="col s12 m6 center">
+            <h5 class="my-green-text">Played Games</h5>
+            <ol class="custom-ol">
+              <li v-for="player in participantsStats.playedGames"> <span>{{capitalizeFirstLetters(player.name)}}</span>
+                - <span>{{player.polls}}</span> </li>
+            </ol>
+          </div>
+          <div class="col s12 m6 center">
+            <h5 class="my-green-text">Invited Friends</h5>
+            <ol class="custom-ol">
+              <li v-for="player in participantsStats.invitedFriends">
+                <span>{{capitalizeFirstLetters(player.name)}}</span> - <span>{{player.friends}}</span> </li>
+            </ol>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <a class="modal-close waves-effect waves-my-green my-green-text btn-flat">close</a>
+      </div>
+    </div>
+    <!-- SHOW STATS MODAL -->
+    <!-- SHOW OLD POLL MODAL -->
+    <div id="show-old-poll-modal" class="modal modal-fixed-footer">
+      <div class="modal-content" v-if="UIBindings.showOldPollInfo">
+        <div class="row">
+          <div class="col s12 poll-info-modal-text center">
+            <h5 class="my-green-text"><i><b>{{oldPolls.polls[oldPolls.selectedPollIdx].info.title}}</b></i></h5>
+            <h6 v-if="showPollNote(oldPolls.polls[oldPolls.selectedPollIdx].info.note)">Note:
+              <span>{{oldPolls.polls[oldPolls.selectedPollIdx].info.note}}</span></h6>
+            <h6>Time: <span>{{formatTime(oldPolls.polls[oldPolls.selectedPollIdx].info.dayTime)}}</span></h6>
+            <h6>Day: <span>{{formatDayDate(oldPolls.polls[oldPolls.selectedPollIdx].info.dayTime)}}</span></h6>
+            <h6>Location: <a v-bind:href="oldPolls.polls[oldPolls.selectedPollIdx].info.locationURL" target="_blank"
+                class="location-url">{{oldPolls.polls[oldPolls.selectedPollIdx].info.locationDescription}}</a></h6>
+          </div>
+        </div>
+        <div class="row no-margin-bot" v-if="UIBindings.showOldPollInfo">
+          <div class="col s12">
+            <ul class="collection with-header z-depth-1">
+              <li class="collection-header">
+                <h5>Players
+                  <span class="my-badge my-green">Friends</span>
+                  <span class="my-badge total-badge"
+                    v-bind:style="calculateColor(oldPolls.polls[oldPolls.selectedPollIdx].participants.length,oldPolls.polls[oldPolls.selectedPollIdx].info.needPlayers,oldPolls.polls[oldPolls.selectedPollIdx].info.maxPlayers)">
+                    {{oldPolls.polls[oldPolls.selectedPollIdx].participants.length}}/{{oldPolls.polls[oldPolls.selectedPollIdx].info.needPlayers}}
+                  </span>
+                </h5>
+              </li>
+              <li class="collection-item" v-for="participant in oldPolls.polls[oldPolls.selectedPollIdx].participants">
+                <div> {{capitalizeFirstLetters(participant.personName)}}
+                  <span class="my-badge my-green"
+                    v-if="showFriendName(participant.friendName)">{{capitalizeFirstLetters(participant.friendName)}}</span>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer" v-if="UIBindings.showOldPollInfo">
+        <a class="modal-close waves-effect waves-my-green my-green-text btn-flat">close</a>
+      </div>
+
+      <!-- SHOW OLD POLL SPINNER -->
+      <div class="spinner-overlay" v-if="UIBindings.loadingOldPollInfo">
+        <img class="spinner-logo" src="img/logo.svg">
+        <div class="preloader-wrapper active spinner">
+          <div class="spinner-layer spinner-green-only">
+            <div class="circle-clipper left">
+              <div class="circle"></div>
+            </div>
+            <div class="gap-patch">
+              <div class="circle"></div>
+            </div>
+            <div class="circle-clipper right">
+              <div class="circle"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- SHOW OLD POLL SPINNER -->
+    </div>
+    <!-- SHOW OLD POLL MODAL -->
+    <!-- MODALS -->
+
+  </div>
+
+
+  <!--<script src="js/materialize.min.js"></script>--><!-- DON'T CHANGE THIS SCRIPT, A BUG IS FIXED INSIDE - TimePicker focusing after closing -->
+  <script src="js/materialize.js"></script> <!-- Delete this, this is only for debugging (DON'T CHANGE THIS SCRIPT, A BUG IS FIXED INSIDE - TimePicker focusing after closing)-->
+  <script src="js/ui-components.js"></script>
+  <script src="js/axios.min.js"></script>
+  <script src="js/api-calls.js"></script>
+  <!--<script src="/js/vue.min.js"></script>-->
+  <script src="js/vue.js"></script> <!-- Delete this, this is only for debugging -->
+  <script src="js/vue-app.js"></script>
+
+</body>
+
+</html>
