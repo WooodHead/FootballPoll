@@ -118,8 +118,8 @@
                     <label id="note-input-label" for="note-input">Note</label>
                   </div>
                   <div class="input-field info-input-field col s12 m6  offset-l1 l5 offset-xl2 xl4">
-                    <input id="loc-desc-input" type="text" autocomplete="off" v-model="currentPoll.editInfo.locationDescription"
-                      maxlength="50">
+                    <input id="loc-desc-input" type="text" autocomplete="off"
+                      v-model="currentPoll.editInfo.locationDescription" maxlength="50">
                     <label id="loc-desc-input-label" for="loc-desc-input">Location description</label>
                   </div>
                   <div class="input-field info-input-field col s12 m6 l5 xl4">
@@ -149,8 +149,7 @@
                   <div class="col s12 center">
                     <button class="waves-effect waves-my-green button-white btn btn-font"
                       @click="cancelEditingPollInfo"><i class="material-icons left">clear</i>cancel</button>
-                    <a id="save-info-button"
-                      class="waves-effect waves-my-green button-white btn left-margin-btn"
+                    <a id="save-info-button" class="waves-effect waves-my-green button-white btn left-margin-btn"
                       @click="openSaveInfoModal"><i class="material-icons left">save</i>save info</a>
                   </div>
 
@@ -179,8 +178,8 @@
                           <label id="name-autocomplete-label" for="name-autocomplete">Player</label>
                         </div>
                         <div class="input-field add-input-field col s12 m6">
-                          <input id="friend-input" type="text" autocomplete="off" v-model="addPollParticipantForm.friendName"
-                            maxlength="25">
+                          <input id="friend-input" type="text" autocomplete="off"
+                            v-model="addPollParticipantForm.friendName" maxlength="25">
                           <label id="friend-input-label" for="friend-input">Friend</label>
                         </div>
                       </div>
@@ -439,7 +438,11 @@
         </div>
         <div class="row no-margin-bot" v-if="UIBindings.showOldPollInfo">
           <div class="col s12">
-            <ul class="collection with-header z-depth-1">
+            <div class="center" v-if="oldPolls.polls[oldPolls.selectedPollIdx].participants.length==0">
+              <h4 class="canceled-game">The game was canceled.</h4>
+            </div>
+            <ul class="collection with-header z-depth-1"
+              v-if="oldPolls.polls[oldPolls.selectedPollIdx].participants.length>0">
               <li class="collection-header">
                 <h5>Players
                   <span class="my-badge my-green">Friends</span>
